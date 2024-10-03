@@ -16,10 +16,26 @@ body {
   overscroll-behavior: none;
 }
 body .container {
-  z-index: 100;
+  position: relative;
+  overflow-y: visible;
+  /* z-index: 100; */
 }
 
-.div .ul .li .a {
+h1,
+h2,
+h3,
+h4 {
+  color: #ff7f50;
+}
+p,
+span,
+strong,
+label,
+.bi {
+  color: aquamarine;
+}
+
+div ul li {
   font-weight: 700;
 }
 
@@ -41,7 +57,6 @@ button {
   position: absolute;
   top: 0px;
   width: 100%;
-  height: 100%;
   padding: 10px;
   overflow: hidden;
   box-sizing: border-box;
@@ -51,7 +66,7 @@ button {
   -ms-user-select: none;
   user-select: none;
   pointer-events: none;
-  z-index: 1; /* TODO Solve this in HTML */
+  z-index: 100; /* TODO Solve this in HTML */
 }
 
 .skills .progress {
@@ -68,7 +83,7 @@ button {
   display: block;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
-  color: #050d18;
+  color: aquamarine;
 }
 
 .skills .progress .skill .val {
@@ -115,7 +130,11 @@ select {
     margin-left: 4px;
   }
   img {
-    scale: 0.15;
+    scale: 0.25;
+  }
+  .navbar-brand,
+  .info {
+    display: none;
   }
 }
 
@@ -128,6 +147,57 @@ select {
   }
   .hero-container p {
     font-size: 1.5rem;
+  }
+  img {
+    scale: 0.5;
+  }
+}
+
+#core {
+  fill: #faf5f6;
+  animation: pulse1 1.5s ease-in-out infinite;
+}
+
+#radar {
+  fill: rgba(#faf5f6, 0.5);
+  animation: pulse2 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse1 {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(2);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+@keyframes pulse2 {
+  0% {
+    transform: scale(1, 1);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(6, 6);
+    opacity: 0;
   }
 }
 

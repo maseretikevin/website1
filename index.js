@@ -1,10 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 let container;
 let camera, scene, renderer;
-
+const hdriLoader = new RGBELoader();
 scene = new THREE.Scene();
 scene.background = new THREE.Color(0xbaeaf3);
 camera = new THREE.PerspectiveCamera(
@@ -22,6 +23,16 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.03;
 renderer.setSize(window.innerWidth, window.innerHeight);
 
+//env
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+hdriLoader.load(
+  "https://skybox.blockadelabs.com/e/fa00372073d38aca126654ff000ecebc",
+  function (texture) {
+    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+    texture.dispose();
+    scene.environment = envMap;
+  }
+);
 //basic javascript
 
 //identify div to render
@@ -55,16 +66,33 @@ if (elapsedElement) {
 // Instantiate a loader
 // console.log("public / models / low_poly_mountain_free / scene.gltf");
 loader.load(
-  "public/models/low_poly_mountain_free/scene.gltf",
+  "/models/low_poly_mountain_free/scene.gltf",
   function (gltf) {
     scene.add(gltf.scene);
 
-    // gltf.animations; // Array<THREE.AnimationClip>
-    // gltf.scene; // THREE.Group
-    // gltf.scenes; // Array<THREE.Group>
-    // gltf.cameras; // Array<THREE.Camera>
-    // gltf.asset; // Object
+    // Center model
+    const bbox = new THREE.Box3().setFromObject(model);
+    const center = bbox.getCenter(new THREE.Vector3());
+    model.position.sub(center);
+
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // controls.enableRotate = false;
+    // controls.enableZoom = true;
+    controls.rotateSpeed = 1.0; //rotation speed
+    controls.zoomSpeed = 1.2; //zoom speed
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.minDistance = 3;
+    controls.maxDistance = 5;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25; //0.05
+
+    function render() {
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    }
   },
+
   // called while loading is progressing
   function (xhr) {
     console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
@@ -77,7 +105,7 @@ loader.load(
 
 //ground
 const mesh = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.PlaneGeometry(100, 100),
   new THREE.MeshPhongMaterial({ color: 0xcbcbcb, depthWrite: false })
 );
 mesh.rotation.x = -Math.PI / 2;
@@ -90,12 +118,14 @@ scene.add(directionalLight);
 scene.add(light);
 scene.add(mesh);
 
-const geometry = new THREE.SphereGeometry(12, 32, 16);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+const geometry = new THREE.SphereGeometry(150, 32, 16);
+const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+const sphere = new THREE.Mesh(geometry, material);
+scene.add(sphere);
 
-camera.position.z = 5;
+camera.position.z = 8;
+camera.position.x = 3;
+camera.position.y = 5;
 function animate() {
   renderer.render(scene, camera);
   controls.update();

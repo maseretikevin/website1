@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { OrbitControls } from "jsm/controls/OrbitControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 let container;
 let camera, scene, renderer;
@@ -14,6 +15,7 @@ camera = new THREE.PerspectiveCamera(
 );
 
 renderer = new THREE.WebGLRenderer();
+const loader = new GLTFLoader();
 // //implement orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -30,17 +32,65 @@ if (container) {
   console.error('Element with ID "modeling" not found');
 }
 //autopopulate year span
-// Get the current year
-const currentYear = new Date().getFullYear();
+// Function to calculate the difference in years
+function diff_years(dt2, dt1) {
+  let diff = (dt2 - dt1) / 1000 / 60 / 60 / 24 / 365.25; // Calculate in years
+  return Math.abs(Math.round(diff)); // Return the absolute value and round it
+}
+const dt1 = new Date(2019, 2, 28); // Feb 28, 2019
 
-// Calculate the difference
-const yearDifference = currentYear - 2019;
-console.log(currentYear);
-// Update the span element with the calculated value
-const yearSpan = document.getElementById("elapsed");
-yearSpan.textContent = yearDifference;
+// Calculate the difference in years
+const yearDifference = diff_years(new Date(), dt1);
+// Assign yearDifference to the data-purecounter-end attribute of the element with id 'elapsed'
+const elapsedElement = document.getElementById("elapsed");
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
+if (elapsedElement) {
+  elapsedElement.setAttribute("data-purecounter-end", yearDifference);
+} else {
+  alert('Element with ID "elapsed" not found');
+}
+// const yearSpan = document.getElementById("elapsed");
+// yearSpan.textContent = 3;
+//gltf file
+// Instantiate a loader
+// console.log("public / models / low_poly_mountain_free / scene.gltf");
+loader.load(
+  "public/models/low_poly_mountain_free/scene.gltf",
+  function (gltf) {
+    scene.add(gltf.scene);
+
+    // gltf.animations; // Array<THREE.AnimationClip>
+    // gltf.scene; // THREE.Group
+    // gltf.scenes; // Array<THREE.Group>
+    // gltf.cameras; // Array<THREE.Camera>
+    // gltf.asset; // Object
+  },
+  // called while loading is progressing
+  function (xhr) {
+    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  },
+  // called when loading has errors
+  function (error) {
+    console.log("An error happened");
+  }
+);
+
+//ground
+const mesh = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshPhongMaterial({ color: 0xcbcbcb, depthWrite: false })
+);
+mesh.rotation.x = -Math.PI / 2;
+mesh.receiveShadow = true;
+
+//add light
+const light = new THREE.AmbientLight(0x404040, 3);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+scene.add(directionalLight);
+scene.add(light);
+scene.add(mesh);
+
+const geometry = new THREE.SphereGeometry(12, 32, 16);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
